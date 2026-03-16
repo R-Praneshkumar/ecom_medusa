@@ -1,0 +1,29 @@
+{
+  "name": "medusa-backend",
+  "version": "1.0.0",
+  "description": "Medusa v2 E-Commerce Backend",
+  "private": true,
+  "scripts": {
+    "build": "medusa build",
+    "start": "medusa start",
+    "dev": "medusa develop",
+    "db:migrate": "medusa db:migrate",
+    "seed": "medusa exec ./src/scripts/seed.ts"
+  },
+  "dependencies": {
+    "@medusajs/admin-sdk": "^2.0.0",
+    "@medusajs/framework": "^2.0.0",
+    "@medusajs/medusa": "^2.0.0",
+    "@medusajs/medusa-cli": "^2.0.0",
+    "pg": "^8.11.3",
+    "awilix": "^11.0.0"
+  },
+  "devDependencies": {
+    "@medusajs/types": "^2.0.0",
+    "typescript": "^5.3.3",
+    "@swc/core": "^1.4.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

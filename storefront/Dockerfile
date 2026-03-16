@@ -1,15 +1,14 @@
 # ============================================
 # Next.js Storefront - Production Dockerfile
-# Optimized for 1-core VPS
+# Clones source inside Docker - no Node.js needed on host
 # ============================================
 
-# Stage 1: Install dependencies
+# Stage 1: Clone and install
 FROM node:20-alpine AS deps
+RUN apk add --no-cache git
 WORKDIR /app
-COPY package.json yarn.lock* package-lock.json* ./
-RUN if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-    elif [ -f package-lock.json ]; then npm ci; \
-    else npm install; fi
+RUN git clone --depth 1 https://github.com/medusajs/nextjs-starter-medusa.git .
+RUN npm install
 
 # Stage 2: Build
 FROM node:20-alpine AS builder
@@ -26,8 +25,17 @@ ENV NEXT_PUBLIC_DEFAULT_REGION=${NEXT_PUBLIC_DEFAULT_REGION}
 ENV REVALIDATE_SECRET=${REVALIDATE_SECRET}
 ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY --from=deps /app ./
+
+# Add standalone output to next config
+RUN if [ -f next.config.mjs ]; then \
+      sed -i '/const nextConfig/,/{/ s/{/{\n  output: "standalone",/' next.config.mjs; \
+    elif [ -f next.config.js ]; then \
+      sed -i '/const nextConfig/,/{/ s/{/{\n  output: "standalone",/' next.config.js; \
+    elif [ -f next.config.ts ]; then \
+      sed -i '/const nextConfig/,/{/ s/{/{\n  output: "standalone",/' next.config.ts; \
+    fi
+
 RUN npm run build
 
 # Stage 3: Production
@@ -42,7 +50,6 @@ ENV HOSTNAME="0.0.0.0"
 RUN addgroup --system --gid 1001 nextjs && \
     adduser --system --uid 1001 nextjs
 
-# Copy standalone build
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nextjs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nextjs /app/.next/static ./.next/static
