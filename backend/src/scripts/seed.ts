@@ -4,7 +4,6 @@ import {
   createProductsWorkflow,
   createRegionsWorkflow,
   createSalesChannelsWorkflow,
-  createShippingOptionsWorkflow,
   createShippingProfilesWorkflow,
   createStockLocationsWorkflow,
   createTaxRegionsWorkflow,

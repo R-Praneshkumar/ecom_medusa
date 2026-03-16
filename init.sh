@@ -41,7 +41,11 @@ REVAL_SECRET=$(openssl rand -hex 16)
 # Create .env
 echo -e "${CYAN}[1/4]${NC} Creating .env..."
 cat > .env << ENVEOF
+POSTGRES_USER=medusa
 POSTGRES_PASSWORD=${PG_PASS}
+POSTGRES_DB=medusa_db
+DATABASE_URL=postgres://medusa:${PG_PASS}@postgres:5432/medusa_db
+REDIS_URL=redis://redis:6379
 JWT_SECRET=${JWT_SECRET}
 COOKIE_SECRET=${COOKIE_SECRET}
 STORE_CORS=http://${DOMAIN},http://${DOMAIN}:8000
@@ -56,6 +60,8 @@ echo -e "${GREEN}[OK]${NC} .env created"
 
 # Update nginx domain
 echo -e "${CYAN}[2/4]${NC} Configuring Nginx..."
+# Reset nginx config from git before replacing domain
+git checkout -- nginx/conf.d/default.conf 2>/dev/null || true
 sed -i "s/DOMAIN_PLACEHOLDER/${DOMAIN}/g" nginx/conf.d/default.conf
 echo -e "${GREEN}[OK]${NC} Nginx configured for ${DOMAIN}"
 
